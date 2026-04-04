@@ -50,15 +50,54 @@ def load_songs(csv_path: str) -> List[Dict]:
     Loads songs from a CSV file.
     Required by src/main.py
     """
-    # TODO: Implement CSV loading logic
-    print(f"Loading songs from {csv_path}...")
-    return []
+    import csv
+    songs = []
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            row["id"] = int(row["id"])
+            row["energy"] = float(row["energy"])
+            row["tempo_bpm"] = float(row["tempo_bpm"])
+            row["valence"] = float(row["valence"])
+            row["danceability"] = float(row["danceability"])
+            row["acousticness"] = float(row["acousticness"])
+            songs.append(row)
+    print(f"Loaded songs: {len(songs)}")
+    return songs
+
+def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
+    """
+    Scores a single song against user preferences.
+    Returns (score, reasons) where reasons is a list of explanation strings.
+    """
+    score = 0.0
+    reasons = []
+
+    if song["genre"] == user_prefs.get("favorite_genre"):
+        score += 2.0
+        reasons.append(f"genre match (+2.0)")
+
+    if song["mood"] == user_prefs.get("favorite_mood"):
+        score += 1.0
+        reasons.append(f"mood match (+1.0)")
+
+    energy_similarity = 1.0 - abs(song["energy"] - user_prefs.get("target_energy", 0.5))
+    score += energy_similarity
+    reasons.append(f"energy similarity (+{energy_similarity:.2f})")
+
+    return score, reasons
+
 
 def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
     """
     Functional implementation of the recommendation logic.
     Required by src/main.py
     """
-    # TODO: Implement scoring and ranking logic
-    # Expected return format: (song_dict, score, explanation)
-    return []
+    scored = []
+    for song in songs:
+        score, reasons = score_song(user_prefs, song)
+        explanation = ", ".join(reasons)
+        scored.append((song, score, explanation))
+
+    scored.sort(key=lambda x: x[1], reverse=True)
+    return scored[:k]

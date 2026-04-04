@@ -45,6 +45,20 @@ How the Recommender scores each song:
 How the songs are chosen:
 The scoring rule is applied to every song in the catalog. Songs are then sorted by score from highest to lowest, and the top K results are returned as recommendations.
 
+Algorithm Recipe (Scoring Rule):
+
+Rule	Condition	Points
+Genre match	song.genre == user.favorite_genre	+2.0
+Mood match	song.mood == user.favorite_mood	+1.0
+Energy similarity	1.0 - abs(song.energy - user.target_energy)	0.0–1.0
+Max possible score = 4.0. Every song is scored, then sorted highest to lowest, and the top K results are returned.
+
+Potential Biases:
+
+Genre is weighted twice as heavily as mood — a great mood match in the wrong genre will always rank below a weak genre match, potentially surfacing mediocre songs just because the genre fits
+Songs with no genre or mood match score at most 1.0 out of 4.0, so niche or cross-genre songs are structurally disadvantaged
+The catalog is small (18 songs) and skewed toward certain genres — users with less-represented preferences (e.g. classical, blues) will get fewer strong matches
+
 
 ┌─────────────────────┐        ┌─────────────────────┐
 │     UserProfile     │        │      songs.csv       │
@@ -75,6 +89,12 @@ The scoring rule is applied to every song in the catalog. Songs are then sorted 
                         │
                         ▼
              🎵 Top Recommendations
+
+
+### Sample Output
+![alt text](image.png)
+
+
 
 
 ---
