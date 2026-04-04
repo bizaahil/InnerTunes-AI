@@ -17,17 +17,65 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Song features used:
 
-Some prompts to answer:
+genre - categorical label(e.g. lofi, pop, rock, ambient)
+mood - emotional tone (e.g., chill, happy, intense, focused)
+energy - 0.0 to 1.0 float representing intensity
+danceability - 0.0 to 1.0 float
+valence - 0.0 to 1.0 musical positivity score
+tempo_bpm - beats per minute (slow/fast)
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+UserProfile stores:
 
-You can include a simple diagram or bullet list if helpful.
+favorite_genre - the genre that the user prefers most
+favorite_mood - the mood that they are looking for
+target_energy - their preferred energy level (0.0 - 1.0)
+likes_acoustic - boolean preference for acoustic sound
+
+
+How the Recommender scores each song:
+
+1. +40 points if the song's genre matches favorite_genre
+2. +30 points if the song's mood matches favorite_mood
+3. Up to +20 points based on how close the song's energy is to target_energy 
+    ->Calculated as (1 - abs(song.energy - user.target_energy)) * 20
+4. +10 points bonus if the user likes acoustic and the song has acousticness > 0.6
+
+How the songs are chosen:
+The scoring rule is applied to every song in the catalog. Songs are then sorted by score from highest to lowest, and the top K results are returned as recommendations.
+
+
+┌─────────────────────┐        ┌─────────────────────┐
+│     UserProfile     │        │      songs.csv       │
+│─────────────────────│        │─────────────────────│
+│ favorite_genre      │        │ genre, mood         │
+│ favorite_mood       │        │ energy, tempo_bpm   │
+│ target_energy       │        │ valence             │
+│ likes_acoustic      │        │ danceability        │
+└────────┬────────────┘        └──────────┬──────────┘
+         │                                │
+         └──────────────┬─────────────────┘
+                        ▼
+             ┌─────────────────────┐
+             │    Scoring Rule     │
+             │─────────────────────│
+             │ genre match  → +40  │
+             │ mood match   → +30  │
+             │ energy diff  → +20  │
+             │ acoustic     → +10  │
+             └──────────┬──────────┘
+                        │  score every song
+                        ▼
+             ┌─────────────────────┐
+             │    Ranking Rule     │
+             │  sort by score desc │
+             │  return top K songs │
+             └──────────┬──────────┘
+                        │
+                        ▼
+             🎵 Top Recommendations
+
 
 ---
 
