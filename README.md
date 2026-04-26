@@ -82,3 +82,15 @@ During development, AI tools were helpful for structuring the system and improvi
 
 Key takeaways:
 AI systems should be explainable and interpretable. Confidence scoring improves trust. Bias detection is important in recommendation systems. Reliability testing is essential for building trustworthy AI systems.
+
+
+Demo Walkthrough:
+
+1. Running the system and generating recommendations
+![alt text](image.png)
+
+2. Example outputs showing explanations and confidence scores across different user profiles
+![alt text](image-1.png)
+
+3. Edge case handling and reliability testing results (4/4 tests passed)
+![alt text](image-2.png)
